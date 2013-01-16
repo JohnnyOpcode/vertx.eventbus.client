@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="AS3WebSocket-RFC6455-v5" type="flex">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/libs/AS3WebSocket-RFC6455-v5.swc!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
