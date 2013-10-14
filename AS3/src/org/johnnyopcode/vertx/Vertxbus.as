@@ -21,6 +21,8 @@ import com.worlize.websocket.WebSocketEvent;
 import flash.events.Event;
 import flash.events.IOErrorEvent;
 import flash.events.SecurityErrorEvent;
+import flash.events.TimerEvent;
+import flash.utils.Timer;
 
 public class Vertxbus
 	{
@@ -41,6 +43,8 @@ public class Vertxbus
 		public var onclose: Function = null;
 		public var onerror: Function = null;
 
+		private var ping:Timer;
+
 		public function Vertxbus(url: String)
 		{
 			url = url.replace(/^http/, "ws");
@@ -53,6 +57,12 @@ public class Vertxbus
 				state = OPEN;
 				if (onopen != null)
 					onopen.call(this);
+				
+				sendPing();
+				
+				ping = new Timer(5000);
+				ping.addEventListener(TimerEvent.TIMER, sendPing);
+				ping.start();
 			});
 
 			socket.addEventListener(WebSocketEvent.CLOSED, function(event: WebSocketEvent): void
@@ -60,6 +70,8 @@ public class Vertxbus
 				state = CLOSED;
 				if (onclose != null)
 					onclose.call(this);
+				
+				ping.stop();
 			});
 
 			socket.addEventListener(WebSocketEvent.MESSAGE, function(event: WebSocketEvent): void
@@ -107,6 +119,12 @@ public class Vertxbus
 			socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleError);
 
 			socket.connect();
+		}
+		
+		protected function sendPing(event:TimerEvent=null):void
+		{
+			if (socket && state == OPEN)
+				socket.sendUTF(JSON.stringify({type: 'ping'}));
 		}
 		
 		private function handleError(event: Event):void
