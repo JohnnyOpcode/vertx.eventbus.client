@@ -32,7 +32,6 @@ public class Vertxbus
 			CLOSING: int = 2,
 			CLOSED: int = 3;
 
-		private var url: String;
 		public var socket: WebSocket;
 		private var handlerMap: Object = { };
 		private var replyHandlers: Object = { };
