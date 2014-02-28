@@ -16,6 +16,7 @@
 package org.johnnyopcode.vertx
 {
 import com.worlize.websocket.WebSocket;
+import com.worlize.websocket.WebSocketErrorEvent;
 import com.worlize.websocket.WebSocketEvent;
 
 import flash.events.Event;
@@ -30,8 +31,10 @@ public class Vertxbus
 			CONNECTING: int = 0,
 			OPEN: int = 1,
 			CLOSING: int = 2,
-			CLOSED: int = 3;
+			CLOSED: int = 3,
+			FAIL: int = 4;
 
+		private var url: String;
 		public var socket: WebSocket;
 		private var handlerMap: Object = { };
 		private var replyHandlers: Object = { };
@@ -41,6 +44,7 @@ public class Vertxbus
 		public var onmessage: Function = null;
 		public var onclose: Function = null;
 		public var onerror: Function = null;
+		public var onfail: Function = null;
 
 		private var ping:Timer;
 
@@ -70,7 +74,18 @@ public class Vertxbus
 				if (onclose != null)
 					onclose.call(this);
 				
-				ping.stop();
+				if (ping)
+					ping.stop();
+			});
+			
+			socket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, function(event: WebSocketErrorEvent): void
+			{
+				state = FAIL;
+				if (onfail != null)
+					onfail.call(this);
+				
+				if (ping)
+					ping.stop();
 			});
 
 			socket.addEventListener(WebSocketEvent.MESSAGE, function(event: WebSocketEvent): void
